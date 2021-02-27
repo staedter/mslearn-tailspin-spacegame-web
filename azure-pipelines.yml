@@ -1,6 +1,13 @@
 trigger:
 - '*'
 
+parameters:
+  - name: buildConfiguration
+    default: 'Release'
+    values:
+      - 'Debug'
+      - 'Release'
+
 pool:
   vmImage: 'ubuntu-18.04'
   demands:
@@ -37,20 +44,9 @@ steps:
     command: 'restore'
     projects: '**/*.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build the project - Release'
-  inputs:
-    command: 'build'
-    arguments: '--no-restore --configuration Release'
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: '**/*.csproj'
-    arguments: '--no-build --configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
-    modifyOutputPath: false
+- template: templates/build.yml
+  parameters:
+    buildConfiguration: {{ parameters.buildConfiguration }} 
 
 - task: PublishBuildArtifacts@1
   condition: succeeded()
